@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="fr">
+<style>
+#screen {
+  position: relative;
+}
+
+/* écran OFF */
+#screen.off {
+  background: black;
+}
+
+/* cache TOUT le contenu */
+#screen.off * {
+  visibility: hidden;
+}
+
+/* texte SKYGUARD visible */
+.boot-text {
+  color: white;
+  font-size: 30px;
+  text-align: center;
+  position: absolute;
+  width: 100%;
+  top: 40%;
+  left: 0;
+}
+</style>
+<style>
+html, body {
+    height: auto;
+    overflow-y: auto;
+}
+</style>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SKYGUARD</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: radial-gradient(circle at bottom, #17202f 0%, #07090f 70%);
+      overflow: hidden;
+      font-family: Inter, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+    }
+
+    .stars {
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+      z-index: 0;
+    }
+
+    .star {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      border-radius: 22px;
+      background: white;
+      opacity: 0.8;
+      animation: twinkle 3s infinite ease-in-out;
+    }
+
+    @keyframes twinkle {
+      0%,100% { opacity: 0.2; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.5); }
+    }
+
+    .device {
+      width: 520px;
+      height: 380px;
+      border-radius: 36px;
+      background:
+        linear-gradient(145deg, #2d2d2d, #131313);
+      padding: 20px;
+      box-shadow:
+        0 40px 80px rgba(0,0,0,0.7),
+        inset 0 2px 3px rgba(255,255,255,0.1),
+        inset 0 -2px 4px rgba(0,0,0,0.7);
+      position: relative;
+      z-index: 2;
+      border: 1px solid rgba(255,255,255,0.05);
+      display:flex;
+      flex-direction:row;
+      gap:20px;
+    }
+
+    .screen {
+      flex: 1;
+      height: 100%;
+      border-radius: 24px;
+      background: #dcdcdc;
+      position: relative;
+      overflow: hidden;
+      box-shadow:
+        inset 0 5px 10px rgba(0,0,0,0.35),
+        0 5px 20px rgba(0,0,0,0.3);
+      transition: all .4s ease;
+    }
+
+    .screen.yellow {
+      background: #ffd400;
+    }
+
+    .screen.red {
+      background: #ff3b30;
+      color: white;
+    }
+
+    .screen.green {
+      background: #1ed760;
+      color: white;
+    }
+
+    .status {
+      display: flex;
+      justify-content: space-between;
+      padding: 14px 16px;
+      font-size: 16px;
+      color: rgba(0,0,0,0.7);
+      font-family: monospace;
+      font-weight: 700;
+    }
+
+    .screen.red .status,
+    .screen.green .status {
+      color: rgba(255,255,255,0.9);
+    }
+
+    .battery {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .battery-bar {
+      width: 28px;
+      height: 14px;
+      border: 2px solid currentColor;
+      border-radius: 4px;
+      position: relative;
+    }
+
+    .battery-fill {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      bottom: 2px;
+      width: 80%;
+      background: #35d66b;
+      border-radius: 2px;
+    }
+
+    .battery-bar::after {
+      content: '';
+      position: absolute;
+      right: -5px;
+      top: 3px;
+      width: 3px;
+      height: 5px;
+      background: currentColor;
+      border-radius: 2px;
+    }
+
+    .altitude-wrapper {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .label {
+      font-size: 14px;
+      letter-spacing: 4px;
+      opacity: 0.7;
+      font-weight: 700;
+    }
+
+    .altitude {
+      font-size: 88px;
+      font-weight: 800;
+      line-height: 1;
+      font-family: monospace;
+      letter-spacing: -5px;
+      text-shadow: 0 5px 10px rgba(0,0,0,0.15);
+    }
+
+    .unit {
+      font-size: 30px;
+      letter-spacing: 3px;
+      opacity: 0.7;
+      font-weight: 700;
+    }
+
+    .vibration {
+      display: flex;
+      gap: 10px;
+      position: absolute;
+      bottom: 24px;
+      opacity: 0;
+      transition: opacity .3s ease;
+    }
+
+    .vibration.active {
+      opacity: 1;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 22px;
+      background: currentColor;
+      box-shadow: 0 0 15px currentColor;
+      animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+      0%,100% { transform: scale(1); opacity: 0.6; }
+      50% { transform: scale(1.4); opacity: 1; }
+    }
+
+    .buttons {
+      width:100px;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      align-items:center;
+      gap:18px;
+    }
+
+    .btn {
+      width: 90px;
+      height: 90px;
+      border-radius: 20px;
+      border: none;
+      cursor: pointer;
+      background: linear-gradient(145deg, #444, #222);
+      color: white;
+      font-size: 32px;
+      font-weight: bold;
+      box-shadow:
+        0 8px 20px rgba(0,0,0,0.5),
+        inset 0 2px 3px rgba(255,255,255,0.15),
+        inset 0 -2px 3px rgba(0,0,0,0.6);
+      transition: all .15s ease;
+    }
+
+    .btn:active {
+      transform: translateY(3px) scale(0.95);
+    }
+
+    .center-btn {
+      width: 95px;
+      height: 95px;
+      font-size: 50px;
+      background: linear-gradient(145deg, #28d764, #149647);
+      box-shadow:
+        0 8px 20px rgba(0,0,0,0.5),
+        inset 0 2px 3px rgba(255,255,255,0.2),
+        inset 0 -2px 3px rgba(0,0,0,0.4);
+    }
+
+    .panel {
+      width: 360px;
+      padding: 28px;
+      border-radius: 28px;
+      background: rgba(15,15,20,0.95);
+      backdrop-filter: blur(20px);
+      box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.08);
+      z-index: 2;
+    }
+
+    .layout {
+      display: flex;
+      gap: 60px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: center;
+      z-index: 2;
+      position: relative;
+    }
+
+    .panel h1 {
+      font-size: 24px;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+
+    .section {
+      margin-bottom: 24px;
+    }
+
+    .section h2 {
+      margin-bottom: 14px;
+      font-size: 14px;
+      letter-spacing: 2px;
+      opacity: 0.8;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    .control-btn {
+      padding: 14px;
+      border: none;
+      border-radius: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all .2s ease;
+      color: white;
+    }
+
+    .jump {
+      background: linear-gradient(135deg, #ff3d3d, #cb2f23);
+    }
+
+    .deploy {
+      background: linear-gradient(135deg, #24d96d, #16a34a);
+    }
+
+    .manual {
+      background: linear-gradient(135deg, #5f7cff, #425de0);
+    }
+
+    .control-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .stats {
+      margin-top: 20px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .stat {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 12px;
+      font-size: 13px;
+    }
+
+    .brand {
+      position: absolute;
+      bottom: 12px;
+      width: 100%;
+      text-align: center;
+      font-size: 11px;
+      letter-spacing: 4px;
+      opacity: 0.3;
+      font-weight: 700;
+    }
+
+    @media(max-width:1000px){
+      .layout {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="stars" id="stars"></div>
+
+<div class="layout">
+
+  <div class="device">
+<div class="buttons">
+      <button class="btn" onclick="increaseAltitude()">▲</button>
+      <button class="btn center-btn" id="modeBtn">●</button>
+      <button class="btn" onclick="decreaseAltitude()">▼</button>
+    </div>
+
+<div class="screen" id="screen">
+
+      <div class="status">
+        <div id="time">12:00</div>
+
+        <div class="battery">
+          <div class="battery-bar">
+            <div class="battery-fill"></div>
+          </div>
+          <span>82%</span>
+        </div>
+      </div>
+
+      <div class="altitude-wrapper">
+        <div class="label">ALTITUDE</div>
+        <div class="altitude" id="altitude">0</div>
+        <div class="unit">M</div>
+
+        <div class="vibration" id="vibration">
+        </div>
+      </div>
+
+    </div>
+</div>
+
+  <div class="panel">
+
+    <div class="section">
+      <strong style="color: white; display: block; margin-bottom: 14px; font-size: 14px; letter-spacing: 2px; opacity: 0.9;">SIMULATION</strong>
+
+      <div class="controls">
+        <button class="control-btn jump" onclick="planeClimb()">DÉCOLLAGE</button>
+        <button class="control-btn deploy" onclick="startJump()">SAUTER</button>
+        <button class="control-btn manual" onclick="deployParachute()">OUVRIR</button>
+      </div>
+    </div>
+
+    <div class="section">
+     
+  </div>
+
+</div>
+
+<script>
+
+  const altitudeEl = document.getElementById('altitude');
+  const screen = document.getElementById('screen');
+  const vibration = document.getElementById('vibration');
+
+  let altitude = 0;
+  let unit = 'M';
+  let jumpInterval;
+  let seconds = 0;
+
+  let breakAltitude = 1500;
+  let openAltitude = 700;
+
+  let isConfigMode = false;
+  let configStep = 0;
+  let pressTimer;
+
+  function toDisplay(value) {
+    return unit === 'FT' ? Math.round(value * 3.28084) : value;
+  }
+
+
+  function updateDisplay() {
+    const displayAltitude = unit === 'FT'
+      ? Math.round(altitude * 3.28084)
+      : altitude;
+    altitudeEl.textContent = displayAltitude;
+
+    if (isConfigMode) return;
+
+    screen.classList.remove('yellow','red','green');
+    vibration.classList.remove('active');
+
+    if (isJumping) {
+      if (altitude <= breakAltitude && altitude > openAltitude) {
+        screen.classList.add('yellow');
+        vibration.classList.add('active');
+      }
+      if (altitude <= openAltitude && altitude > 0) {
+        screen.classList.add('red');
+        vibration.classList.add('active');
+      }
+      return;
+    }
+
+    if (altitude <= breakAltitude && altitude > 0) {
+      vibration.classList.add('active');
+    }
+  }
+
+  function increaseAltitude() {
+    altitude += 100;
+    updateDisplay();
+  }
+
+  function decreaseAltitude() {
+    altitude -= 100;
+    updateDisplay();
+  }
+
+  function toggleUnit() {
+    unit = unit === 'M' ? 'FT' : 'M';
+    document.querySelector('.unit').textContent = unit;
+    if (isConfigMode) {
+      document.querySelector('.label').textContent = configLabel(configStep);
+      altitudeEl.textContent = configStep === 0 ? toDisplay(breakAltitude) : toDisplay(openAltitude);
+    }
+    updateDisplay();
+  }
+
+
+  function planeClimb() {
+
+    clearInterval(jumpInterval);
+
+    altitude = 4000;
+    updateDisplay();
+  }
+
+  function startJump() {
+
+
+  clearInterval(jumpInterval);
+
+  isJumping = true;
+  seconds = 0;
+
+  jumpInterval = setInterval(() => {
+
+    altitude -= 80;
+
+    if (altitude <= 0) {
+      altitude = 0;
+      isJumping = false;
+      clearInterval(jumpInterval);
+    }
+
+    seconds++;
+
+    updateDisplay();
+
+  }, 120);
+}
+
+  function deployParachute() {
+    clearInterval(jumpInterval);
+
+    screen.classList.remove('yellow','red');
+
+    jumpInterval = setInterval(() => {
+
+      altitude -= 15;
+
+      if (altitude <= 0) {
+        altitude = 0;
+        clearInterval(jumpInterval);
+      }
+
+      updateDisplay();
+
+      if (altitude < openAltitude) {
+        screen.classList.remove('yellow','red');
+      }
+
+    }, 150);
+  }
+
+  function updateClock() {
+    const now = new Date();
+    const h = String(now.getHours()).padStart(2,'0');
+    const m = String(now.getMinutes()).padStart(2,'0');
+
+    document.getElementById('time').textContent = `${h}:${m}`;
+  }
+
+  const modeBtn = document.getElementById('modeBtn');
+
+  modeBtn.addEventListener('mousedown', () => {
+    pressTimer = setTimeout(() => {
+      enterConfigMode();
+    }, 2000);
+  });
+
+  modeBtn.addEventListener('mouseup', () => {
+    clearTimeout(pressTimer);
+  });
+
+  modeBtn.addEventListener('mouseleave', () => {
+    clearTimeout(pressTimer);
+  });
+
+  let justEnteredConfig = false;
+
+  modeBtn.addEventListener('click', () => {
+
+    if (justEnteredConfig) {
+      justEnteredConfig = false;
+      return;
+    }
+
+    if (!isConfigMode) {
+      toggleUnit();
+      return;
+    }
+
+    configStep++;
+
+    if (configStep === 1) {
+      altitudeEl.textContent = toDisplay(openAltitude);
+      document.querySelector('.label').textContent = configLabel(1);
+
+      screen.classList.remove('yellow','green');
+      screen.classList.add('red');
+    }
+
+    else {
+      screen.classList.remove('yellow','red');
+
+      isConfigMode = false;
+      configStep = 0;
+      document.querySelector('.label').textContent = 'ALTITUDE';
+      updateDisplay();
+    }
+  });
+
+  function enterConfigMode() {
+
+    justEnteredConfig = true;
+
+    isConfigMode = true;
+    configStep = 0;
+
+    document.querySelector('.label').textContent = unit === 'FT' ? 'BREAK' : 'BREAK';
+    altitudeEl.textContent = toDisplay(breakAltitude);
+
+    screen.classList.remove('red','green');
+    screen.classList.add('yellow');
+  }
+
+  function configLabel(step) {
+    if (step === 0) return unit === 'FT' ? 'BREAK' : 'BREAK';
+    if (step === 1) return unit === 'FT' ? 'OPENING' : 'OUVERTURE';
+    return 'ALTITUDE';
+  }
+
+  function increaseAltitude() {
+
+    if (isConfigMode) {
+
+      if (configStep === 0) {
+        breakAltitude += 100;
+        altitudeEl.textContent = toDisplay(breakAltitude);
+      }
+
+      else {
+        openAltitude += 100;
+        altitudeEl.textContent = toDisplay(openAltitude);
+      }
+
+      return;
+    }
+
+    altitude += 100;
+    updateDisplay();
+  }
+
+  function decreaseAltitude() {
+
+    if (isConfigMode) {
+
+      if (configStep === 0) {
+        breakAltitude = Math.max(0, breakAltitude - 100);
+        altitudeEl.textContent = toDisplay(breakAltitude);
+      }
+
+      else {
+        openAltitude = Math.max(0, openAltitude - 100);
+        altitudeEl.textContent = toDisplay(openAltitude);
+      }
+
+      return;
+    }
+
+    altitude -= 100;
+    updateDisplay();
+  }
+
+  setInterval(updateClock, 1000);
+  updateClock();
+  updateDisplay();
+
+  const stars = document.getElementById('stars');
+
+  for(let i=0;i<140;i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    s.style.left = Math.random() * 100 + '%';
+    s.style.top = Math.random() * 100 + '%';
+    s.style.animationDelay = Math.random() * 3 + 's';
+    stars.appendChild(s);
+  }
+
+</script>
+<script>
+window.onload = function () {
+
+  let isOn = true;
+  let timer;
+
+  const btn = document.getElementById("modeBtn");
+  const screen = document.getElementById("screen");
+
+  function startHold() {
+
+    timer = setTimeout(() => {
+
+      isOn = !isOn;
+
+      if (isOn) {
+        screen.classList.remove("off");
+      } else {
+        screen.classList.add("off");
+      }
+
+    }, 4000);
+
+  }
+
+  function stopHold() {
+    clearTimeout(timer);
+  }
+
+  // PC
+  btn.addEventListener("mousedown", startHold);
+  btn.addEventListener("mouseup", stopHold);
+
+  // mobile
+  btn.addEventListener("touchstart", startHold);
+  btn.addEventListener("touchend", stopHold);
+
+};
+</script>
+<div id="guide" style="display:none; margin-top:20px;">
+ <!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guide d'utilisation - SKYGUARD</title>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f5f5f5;
+        color: #333;
+    }
+
+    .container {
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+        text-align: center;
+        color: #1f2937;
+        border-bottom: 3px solid #2563eb;
+        padding-bottom: 10px;
+    }
+
+    h2 {
+        color: #2563eb;
+        margin-top: 35px;
+        border-left: 5px solid #2563eb;
+        padding-left: 10px;
+    }
+
+    h3 {
+        color: #374151;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 15px 0;
+    }
+
+    th {
+        background: #2563eb;
+        color: white;
+        padding: 12px;
+        text-align: left;
+    }
+
+    td {
+        padding: 10px;
+        border: 1px solid #ddd;
+    }
+
+    tr:nth-child(even) {
+        background: #f9fafb;
+    }
+
+    ul, ol {
+        margin-left: 20px;
+    }
+
+    .button {
+        font-weight: bold;
+        color: #111827;
+    }
+
+    .normal {
+        background: #d1d5db;
+        padding: 10px;
+        border-radius: 6px;
+    }
+
+    .break-zone {
+        background: #fef08a;
+        padding: 10px;
+        border-radius: 6px;
+    }
+
+    .open-zone {
+        background: #fca5a5;
+        padding: 10px;
+        border-radius: 6px;
+    }
+
+    .summary {
+        background: #eff6ff;
+        border-left: 5px solid #2563eb;
+        padding: 15px;
+        margin-top: 20px;
+        border-radius: 6px;
+    }
+
+    .default-values {
+        font-size: 1.1em;
+        font-weight: bold;
+        color: #1e40af;
+        text-align: center;
+        margin-top: 20px;
+    }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Guide d’utilisation – Altimètre SKYGUARD</h1>
+
+<h2>1. Présentation</h2>
+
+<p>
+Le <strong>SKYGUARD</strong> est un altimètre de parachutisme doté de deux seuils d’alerte configurables :
+</p>
+
+<ul>
+    <li><strong>Altitude de BREAK</strong> : altitude à laquelle l’appareil déclenche une alerte préventive.</li>
+    <li><strong>Altitude d’OUVERTURE</strong> : altitude critique à laquelle l’ouverture du parachute doit être effectuée.</li>
+</ul>
+
+<table>
+    <tr>
+        <th>Couleur</th>
+        <th>Signification</th>
+    </tr>
+    <tr>
+        <td>Gris</td>
+        <td>Fonctionnement normal</td>
+    </tr>
+    <tr>
+        <td>Jaune</td>
+        <td>Zone d’alerte BREAK</td>
+    </tr>
+    <tr>
+        <td>Rouge</td>
+        <td>Zone d’ouverture du parachute</td>
+    </tr>
+    <tr>
+        <td>Noir</td>
+        <td>Appareil éteint</td>
+    </tr>
+</table>
+
+<h2>2. Description des commandes</h2>
+
+<h3>▲ Bouton Haut</h3>
+<ul>
+    <li>Augmente une valeur.</li>
+    <li>En mode normal : augmente l’altitude affichée.</li>
+    <li>En mode configuration : augmente le seuil sélectionné.</li>
+</ul>
+
+<h3>▼ Bouton Bas</h3>
+<ul>
+    <li>Diminue une valeur.</li>
+    <li>En mode normal : diminue l’altitude affichée.</li>
+    <li>En mode configuration : diminue le seuil sélectionné.</li>
+</ul>
+
+<h3>● Bouton Central</h3>
+<p>Permet plusieurs fonctions selon la durée d’appui.</p>
+
+<h2>3. Mise en marche et arrêt</h2>
+
+<h3>Allumage / Extinction</h3>
+
+<ol>
+    <li>Maintenir le bouton <strong>●</strong> pendant 4 secondes.</li>
+    <li>L’écran s’allume ou s’éteint.</li>
+</ol>
+
+<p>Lorsque l’appareil est éteint, l’écran devient entièrement noir.</p>
+
+<h2>4. Changement d’unité</h2>
+
+<p>Un appui bref sur le bouton <strong>●</strong> permet d’alterner entre :</p>
+
+<ul>
+    <li><strong>M</strong> : mètres</li>
+    <li><strong>FT</strong> : pieds</li>
+</ul>
+
+<p>Conversion automatique :</p>
+
+<ul>
+    <li>1 mètre = 3,28084 pieds</li>
+</ul>
+
+<h2>5. Réglage des altitudes d’alerte</h2>
+
+<h3>Entrer dans le mode configuration</h3>
+
+<ol>
+    <li>Maintenir le bouton <strong>●</strong> pendant 2 secondes.</li>
+    <li>L’écran devient jaune.</li>
+    <li>Le message <strong>BREAK</strong> apparaît.</li>
+</ol>
+
+<h3>Réglage du seuil BREAK</h3>
+
+<ul>
+    <li>▲ pour augmenter de 100 m</li>
+    <li>▼ pour diminuer de 100 m</li>
+</ul>
+
+<p><strong>Valeur par défaut :</strong> 1500 m</p>
+
+<h3>Passer au réglage OUVERTURE</h3>
+
+<ol>
+    <li>Appuyer brièvement sur ●.</li>
+    <li>L’écran devient rouge.</li>
+    <li>Le message <strong>OUVERTURE</strong> apparaît.</li>
+</ol>
+
+<h3>Réglage du seuil OUVERTURE</h3>
+
+<ul>
+    <li>▲ pour augmenter de 100 m</li>
+    <li>▼ pour diminuer de 100 m</li>
+</ul>
+
+<p><strong>Valeur par défaut :</strong> 700 m</p>
+
+<h3>Quitter la configuration</h3>
+
+<ol>
+    <li>Appuyer de nouveau sur ●.</li>
+    <li>L’appareil revient à l’affichage normal de l’altitude.</li>
+</ol>
+
+<h2>6. Fonctionnement en saut</h2>
+
+<h3>Zone normale</h3>
+
+<div class="normal">
+    <p><strong>Altitude supérieure au seuil BREAK :</strong></p>
+    <ul>
+        <li>Écran gris</li>
+        <li>Aucune vibration</li>
+    </ul>
+</div>
+
+<h3>Zone BREAK</h3>
+
+<div class="break-zone">
+    <p><strong>Altitude ≤ BREAK et &gt; OUVERTURE</strong></p>
+    <ul>
+        <li>Écran jaune</li>
+        <li>Activation des vibrations d’alerte</li>
+    </ul>
+</div>
+
+<p>Cette alerte indique qu’il est temps de préparer les procédures d’ouverture.</p>
+
+<h3>Zone OUVERTURE</h3>
+
+<div class="open-zone">
+    <p><strong>Altitude ≤ OUVERTURE</strong></p>
+    <ul>
+        <li>Écran rouge</li>
+        <li>Maintien des vibrations</li>
+    </ul>
+</div>
+
+<p>Cette alerte indique qu’il faut ouvrir immédiatement le parachute.</p>
+
+<h2>7. Informations affichées à l’écran</h2>
+
+<ul>
+    <li><strong>Heure :</strong> affichée en haut à gauche (HH:MM)</li>
+    <li><strong>Batterie :</strong> icône + pourcentage restant (82 % dans cette version)</li>
+    <li><strong>Altitude :</strong> affichée au centre en très grands caractères</li>
+    <li><strong>Unité :</strong> M ou FT sous l’altitude</li>
+</ul>
+
+<h2>8. Réglages d’usine</h2>
+
+<table>
+    <tr>
+        <th>Paramètre</th>
+        <th>Valeur</th>
+    </tr>
+    <tr>
+        <td>BREAK</td>
+        <td>1500 m</td>
+    </tr>
+    <tr>
+        <td>OUVERTURE</td>
+        <td>700 m</td>
+    </tr>
+    <tr>
+        <td>Unité</td>
+        <td>Mètres</td>
+    </tr>
+</table>
+
+<h2>9. Exemple d’utilisation</h2>
+
+<h3>Avant embarquement</h3>
+
+<ol>
+    <li>Allumer le SKYGUARD.</li>
+    <li>Vérifier les seuils :
+        <ul>
+            <li>BREAK : 1500 m</li>
+            <li>OUVERTURE : 700 m</li>
+        </ul>
+    </li>
+    <li>Vérifier la batterie.</li>
+    <li>Choisir l’unité souhaitée (M ou FT).</li>
+</ol>
+
+<h3>Pendant le saut</h3>
+
+<ul>
+    <li>Au-dessus de 1500 m : surveillance normale.</li>
+    <li>À 1500 m : écran jaune + vibration.</li>
+    <li>À 700 m : écran rouge + vibration renforcée.</li>
+    <li>Procéder à l’ouverture du parachute conformément aux procédures de sécurité.</li>
+</ul>
+
+<h2>Récapitulatif rapide</h2>
+
+<table>
+    <tr>
+        <th>Action</th>
+        <th>Manipulation</th>
+    </tr>
+    <tr>
+        <td>Changer M / FT</td>
+        <td>Appui bref sur ●</td>
+    </tr>
+    <tr>
+        <td>Entrer en configuration</td>
+        <td>Maintenir ● 2 s</td>
+    </tr>
+    <tr>
+        <td>Régler BREAK</td>
+        <td>▲ / ▼</td>
+    </tr>
+    <tr>
+        <td>Passer à OUVERTURE</td>
+        <td>Appui bref sur ●</td>
+    </tr>
+    <tr>
+        <td>Régler OUVERTURE</td>
+        <td>▲ / ▼</td>
+    </tr>
+    <tr>
+        <td>Quitter configuration</td>
+        <td>Appui bref sur ●</td>
+    </tr>
+    <tr>
+        <td>Allumer / Éteindre</td>
+        <td>Maintenir ● 4 s</td>
+    </tr>
+</table>
+
+<div class="summary">
+    <strong>Valeurs par défaut :</strong><br>
+    BREAK : 1500 m<br>
+    OUVERTURE : 700 m
+</div>
+
+</div>
+<script>
+function toggleGuide() {
+    const guide = document.getElementById("guide");
+
+    if (guide.style.display === "none") {
+        guide.style.display = "block";
+    } else {
+        guide.style.display = "none";
+    }
+}
+</script>
+</body>
+</html>
+</div>
+</body>
+<button onclick="toggleGuide()" style="padding:12px 20px; cursor:pointer; background-color: white; color: black; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; letter-spacing: 1px;">
+    Afficher / Masquer le mode d'emploi
+</button>
+</section>
+</html>
